@@ -11,7 +11,11 @@ pipeline {
         stage('Build Application') {
             steps {
                 dir('app') {
-                    sh 'mvn clean package -DskipTests'
+                    script {
+                        docker.image('maven:3.9.6-eclipse-temurin-17').inside {
+                            sh 'mvn clean package -DskipTests'
+                        }
+                    }
                 }
             }
         }
@@ -29,7 +33,11 @@ pipeline {
             steps {
                 sleep(time: 10, unit: "SECONDS")
                 dir('tests') {
-                    sh 'mvn test'
+                    script {
+                        docker.image('maven:3.9.6-eclipse-temurin-17').inside {
+                            sh 'mvn test'
+                        }
+                    }
                 }
             }
             post {
