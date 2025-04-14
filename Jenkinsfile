@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.6-eclipse-temurin-17'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     stages {
         stage('Checkout') {
@@ -34,7 +29,7 @@ pipeline {
             steps {
                 sleep(time: 10, unit: "SECONDS")
                 dir('tests') {
-                    sh 'mvn clean test'
+                    sh 'mvn test'
                 }
             }
             post {
