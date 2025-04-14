@@ -13,7 +13,7 @@ public class Application {
     }
 
     @GetMapping("/health")
-    public String health() {
-        return "OK";
+    public String healthCheck() {
+        return "Application is running!";
     }
 }

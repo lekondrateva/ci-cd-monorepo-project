@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.9.6-eclipse-temurin-17'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     stages {
         stage('Checkout') {
@@ -19,15 +24,15 @@ pipeline {
         stage('Docker Build & Run') {
             steps {
                 dir('app') {
-                    sh 'docker build -t my-app:latest .'
-                    sh 'docker run -d --name my-app-container -p 8080:8080 my-app:latest'
+                    sh 'docker build -t myapp:latest .'
+                    sh 'docker run -d --name my-app-container -p 8080:8080 myapp:latest'
                 }
             }
         }
 
         stage('Run Tests') {
             steps {
-                sleep(time:10, unit:"SECONDS") // ожидание запуска приложения
+                sleep(time: 10, unit: "SECONDS")
                 dir('tests') {
                     sh 'mvn clean test'
                 }

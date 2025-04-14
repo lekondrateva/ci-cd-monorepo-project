@@ -11,6 +11,6 @@ public class ApplicationTest {
         get("http://localhost:8080/health")
                 .then()
                 .statusCode(200)
-                .body(equalTo("OK"));
+                .body(equalTo("Application is running!"));
     }
 }
