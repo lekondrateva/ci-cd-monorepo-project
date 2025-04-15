@@ -11,11 +11,7 @@ pipeline {
         stage('Build Application') {
             steps {
                 dir('app') {
-                    script {
-                        docker.image('maven:3.9.6-eclipse-temurin-17').inside {
-                            sh 'mvn clean package -DskipTests'
-                        }
-                    }
+                    sh 'docker run --rm -v $PWD:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean package -DskipTests'
                 }
             }
         }
@@ -24,7 +20,7 @@ pipeline {
             steps {
                 dir('app') {
                     sh 'docker build -t myapp:latest .'
-                    sh "docker run -d --name my-app-container --network jenkins-net -p 8080:8080 myapp:latest"
+                    sh 'docker run -d --name my-app-container --network jenkins-net -p 8080:8080 myapp:latest'
                 }
             }
         }
@@ -33,22 +29,26 @@ pipeline {
             steps {
                 sleep(time: 20, unit: "SECONDS")
                 dir('tests') {
-                    script {
-                        docker.image('maven:3.9.6-eclipse-temurin-17').inside("--network jenkins-net") {
-                            sh '''
-                              echo "Waiting for app to become healthy..."
-                              for i in {1..10}; do
-                                if curl -s http://my-app-container:8080/actuator/health | grep -q UP; then
-                                  echo "App is up!"
-                                  break
-                                fi
-                                echo "Still waiting..."
-                                sleep 3
-                              done
-                            '''
-                            sh 'mvn test'
-                        }
-                    }
+                    sh """
+                        echo "Waiting for app to become healthy..."
+                        for i in {1..10}; do
+                          if curl -s http://my-app-container:8080/actuator/health | grep -q UP; then
+                            echo "App is up!"
+                            break
+                          fi
+                          echo "Still waiting..."
+                          sleep 3
+                        done
+                    """
+
+                    sh '''
+                        docker run --rm \
+                          --network jenkins-net \
+                          -v $PWD:/tests \
+                          -w /tests \
+                          maven:3.9.6-eclipse-temurin-17 \
+                          mvn test
+                    '''
                 }
             }
             post {
