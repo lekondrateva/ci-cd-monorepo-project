@@ -11,20 +11,10 @@ pipeline {
         stage('Build Application') {
             steps {
                 script {
-                    def pomDir = "${env.WORKSPACE}"
-
-                    // 🔍 Показываем, что попадает в контейнер
+                    def workspace = "${env.WORKSPACE}/ci-cd-monorepo-project"
                     sh """
                         docker run --rm \
-                          -v ${pomDir}:/project \
-                          -w /project \
-                          alpine sh -c "ls -la /project"
-                    """
-
-                    // 🛠 Запускаем Maven
-                    sh """
-                        docker run --rm \
-                          -v ${pomDir}:/project \
+                          -v ${workspace}:/project \
                           -w /project \
                           maven:3.9.6-eclipse-temurin-17 \
                           mvn clean package -DskipTests
