@@ -31,7 +31,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sleep(time: 10, unit: "SECONDS")
+                sleep(time: 20, unit: "SECONDS")
                 dir('tests') {
                     script {
                         docker.image('maven:3.9.6-eclipse-temurin-17').inside {
