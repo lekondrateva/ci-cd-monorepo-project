@@ -10,14 +10,16 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                script {
-                    sh '''
-                        docker run --rm \
-                          -v $PWD:/project \
-                          -w /project \
-                          maven:3.9.6-eclipse-temurin-17 \
-                          mvn clean package -DskipTests
-                    '''
+                dir('ci-cd-monorepo-project') {
+                    script {
+                        sh '''
+                            docker run --rm \
+                              -v $PWD:/project \
+                              -w /project \
+                              maven:3.9.6-eclipse-temurin-17 \
+                              mvn clean package -DskipTests
+                        '''
+                    }
                 }
             }
         }
