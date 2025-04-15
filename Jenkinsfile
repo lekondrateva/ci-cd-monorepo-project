@@ -17,7 +17,7 @@ pipeline {
                           -v ${workspacePath}:/project \
                           -w /project \
                           maven:3.9.6-eclipse-temurin-17 \
-                          mvn clean package -DskipTests -pl app
+                          mvn clean package -DskipTests
                     """
                 }
             }
