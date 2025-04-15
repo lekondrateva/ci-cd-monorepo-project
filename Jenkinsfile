@@ -17,33 +17,33 @@ pipeline {
                     }
                 }
 
-        stage('Build Application') {
-            steps {
-                script {
-                    echo "WORKSPACE = ${env.WORKSPACE}"
+stage('Build Application') {
+    steps {
+        script {
+            echo "WORKSPACE = ${env.WORKSPACE}"
 
-                    // Проверка содержимого рабочей директории Jenkins
-                    sh "ls -la ${env.WORKSPACE}"
+            // Проверка содержимого рабочей директории Jenkins
+            sh "ls -la ${env.WORKSPACE}"
 
-                    // Проверка содержимого внутри контейнера Alpine
-                    sh """
-                        docker run --rm \
-                          -v ${env.WORKSPACE}:/project \
-                          -w /project \
-                          alpine sh -c "echo '🔍 Содержимое внутри контейнера:' && ls -la /project"
-                    """
+            // Проверка содержимого внутри контейнера Alpine
+            sh """
+                docker run --rm \
+                  -v ${env.WORKSPACE}:/project \
+                  -w /project \
+                  alpine sh -c "echo '🔍 Содержимое внутри контейнера:' && ls -la /project"
+            """
 
-                    // Сборка Maven-проекта внутри контейнера
-                    sh """
-                        docker run --rm \
-                          -v ${env.WORKSPACE}:/project \
-                          -w /project \
-                          maven:3.9.6-eclipse-temurin-17 \
-                          mvn clean package -DskipTests
-                    """
-                }
-            }
+            // Сборка Maven-проекта внутри контейнера
+            sh """
+                docker run --rm \
+                  -v ${env.WORKSPACE}:/project:z \
+                  -w /project \
+                  maven:3.9.6-eclipse-temurin-17 \
+                  mvn clean package -DskipTests
+            """
         }
+    }
+}
 
         stage('Docker Build & Run') {
             steps {
