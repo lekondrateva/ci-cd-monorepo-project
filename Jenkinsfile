@@ -20,10 +20,12 @@ pipeline {
 stage('Build Application') {
     steps {
         script {
-            def pomDir = "${env.WORKSPACE}" // здесь лежит pom.xml
+            echo "WORKSPACE = ${env.WORKSPACE}"
+            sh 'ls -la ${WORKSPACE}' // убедимся, что pom.xml точно есть
+
             sh """
                 docker run --rm \
-                  -v ${pomDir}:/project \
+                  -v ${env.WORKSPACE}:/project \
                   -w /project \
                   maven:3.9.6-eclipse-temurin-17 \
                   mvn clean package -DskipTests
