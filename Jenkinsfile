@@ -11,22 +11,13 @@ pipeline {
         stage('Build Application') {
             steps {
                 script {
-                    def workspacePath = pwd()
-                    // Проверка на видимость pom.xml
-                    sh """
+                    sh '''
                         docker run --rm \
-                          -v ${workspacePath}:/project \
-                          -w /project \
-                          alpine sh -c 'ls -la /project'
-                    """
-                    // Сборка
-                    sh """
-                        docker run --rm \
-                          -v ${workspacePath}:/project \
+                          -v $PWD:/project \
                           -w /project \
                           maven:3.9.6-eclipse-temurin-17 \
                           mvn clean package -DskipTests
-                    """
+                    '''
                 }
             }
         }
