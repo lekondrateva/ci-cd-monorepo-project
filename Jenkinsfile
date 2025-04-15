@@ -4,7 +4,7 @@ pipeline {
     options {
         skipDefaultCheckout(true)
         disableConcurrentBuilds()
-        durabilityHint('performanceOptimized')
+        durabilityHint(org.jenkinsci.plugins.workflow.flow.FlowDurabilityHint.PERFORMANCE_OPTIMIZED)
     }
 
     environment {
