@@ -46,6 +46,7 @@ pipeline {
                           sleep 3
                         done
                     '''
+
                     sh '''
                         docker run --rm \
                           --network jenkins-net \
