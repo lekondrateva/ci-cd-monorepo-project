@@ -34,18 +34,18 @@ pipeline {
                 sleep(time: 20, unit: "SECONDS")
                 dir('tests') {
                     script {
-                        docker.image('maven:3.9.6-eclipse-temurin-17').inside {
-                        sh '''
-                          echo "Waiting for app to become healthy..."
-                          for i in {1..10}; do
-                            if curl -s http://host.docker.internal:8080/actuator/health | grep -q UP; then
-                              echo "App is up!"
-                              break
-                            fi
-                            echo "Still waiting..."
-                            sleep 3
-                          done
-                        '''
+                        docker.image('maven:3.9.6-eclipse-temurin-17').inside("--network jenkins-net") {
+                            sh '''
+                              echo "Waiting for app to become healthy..."
+                              for i in {1..10}; do
+                                if curl -s http://my-app-container:8080/actuator/health | grep -q UP; then
+                                  echo "App is up!"
+                                  break
+                                fi
+                                echo "Still waiting..."
+                                sleep 3
+                              done
+                            '''
                             sh 'mvn test'
                         }
                     }
