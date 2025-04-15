@@ -13,7 +13,7 @@ pipeline {
                 dir('ci-cd-monorepo-project') {
                     sh '''
                         docker run --rm \
-                          -v $(pwd):/project \
+                          -v $PWD:/project \
                           -w /project \
                           maven:3.9.6-eclipse-temurin-17 \
                           mvn clean package -DskipTests
@@ -24,7 +24,7 @@ pipeline {
 
         stage('Docker Build & Run') {
             steps {
-                dir('app') {
+                dir('ci-cd-monorepo-project/app') {
                     sh 'docker build -t myapp:latest .'
                     sh 'docker run -d --name my-app-container --network jenkins-net -p 8080:8080 myapp:latest'
                 }
@@ -34,7 +34,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sleep(time: 20, unit: "SECONDS")
-                dir('tests') {
+                dir('ci-cd-monorepo-project/tests') {
                     sh '''
                         echo "Waiting for app to become healthy..."
                         for i in {1..10}; do
@@ -46,7 +46,6 @@ pipeline {
                           sleep 3
                         done
                     '''
-
                     sh '''
                         docker run --rm \
                           --network jenkins-net \
@@ -60,7 +59,7 @@ pipeline {
             post {
                 always {
                     allure([
-                        results: [[path: 'tests/target/allure-results']]
+                        results: [[path: 'ci-cd-monorepo-project/tests/target/allure-results']]
                     ])
                 }
             }
