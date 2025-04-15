@@ -11,12 +11,12 @@ pipeline {
         stage('Build Application') {
             steps {
                 dir('app') {
-                    // Временный шаг для отладки: покажет содержимое директории
                     sh 'ls -la .'
 
                     sh '''
                         docker run --rm \
-                          -v $(pwd):/app \
+                          -u $(id -u):$(id -g) \
+                          -v "$PWD":/app \
                           -w /app \
                           maven:3.9.6-eclipse-temurin-17 \
                           mvn clean package -DskipTests
