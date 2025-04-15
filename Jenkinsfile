@@ -12,11 +12,11 @@ pipeline {
             steps {
                 dir('app') {
                     sh 'ls -la .'
+                    sh 'pwd'
 
                     sh '''
                         docker run --rm \
-                          -u $(id -u):$(id -g) \
-                          -v "$PWD":/app \
+                          -v $(pwd):/app \
                           -w /app \
                           maven:3.9.6-eclipse-temurin-17 \
                           mvn clean package -DskipTests
