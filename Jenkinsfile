@@ -11,7 +11,17 @@ pipeline {
         stage('Build Application') {
             steps {
                 script {
-                    def pomDir = "${env.WORKSPACE}" // просто корень, без /ci-cd-monorepo-project
+                    def pomDir = "${env.WORKSPACE}"
+
+                    // 🔍 Показываем, что попадает в контейнер
+                    sh """
+                        docker run --rm \
+                          -v ${pomDir}:/project \
+                          -w /project \
+                          alpine sh -c "ls -la /project"
+                    """
+
+                    // 🛠 Запускаем Maven
                     sh """
                         docker run --rm \
                           -v ${pomDir}:/project \
