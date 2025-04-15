@@ -1,11 +1,19 @@
-version: '3.9'
+version: "3.9"
 
 services:
+  app:
+    build:
+      context: ./app
+    ports:
+      - "8080:8080"
+
+  tests:
+    build:
+      context: ./tests
+
   jenkins:
     build:
-      context: .
-      dockerfile: Dockerfile.jenkins
-    container_name: jenkins
+      context: ./jenkins
     ports:
       - "8081:8080"
       - "50000:50000"
@@ -15,21 +23,8 @@ services:
     networks:
       - jenkins-net
 
-  app:
-    build: ./app
-    ports:
-      - "8080:8080"
-    networks:
-      - jenkins-net
-
-  tests:
-    build: ./tests
-    networks:
-      - jenkins-net
+networks:
+  jenkins-net:
 
 volumes:
   jenkins_home:
-
-networks:
-  jenkins-net:
-    driver: bridge
