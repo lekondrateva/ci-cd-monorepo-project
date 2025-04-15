@@ -1,67 +1,56 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout(true)
-        disableConcurrentBuilds()
-        durabilityHint(org.jenkinsci.plugins.workflow.flow.FlowDurabilityHint.PERFORMANCE_OPTIMIZED)
-    }
-
-    environment {
-        APP_CONTAINER_NAME = 'my-app-container'
-        APP_IMAGE = 'myapp:latest'
-        NETWORK = 'jenkins-net'
-    }
-
     stages {
         stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM', userRemoteConfigs: [[url: 'https://github.com/lekondrateva/ci-cd-monorepo-project.git']]])
+                checkout scm
             }
         }
 
         stage('Build Application') {
             steps {
-                sh 'docker run --rm -v $PWD/app:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean package -DskipTests'
+                sh '''
+                    docker run --rm \
+                      -v "$PWD/app:/app" \
+                      -w /app \
+                      maven:3.9.6-eclipse-temurin-17 \
+                      mvn clean package -DskipTests
+                '''
             }
         }
 
         stage('Docker Build & Run') {
             steps {
-                dir('app') {
-                    sh '''
-                        docker build -t $APP_IMAGE .
-                        docker run -d --name $APP_CONTAINER_NAME --network $NETWORK -p 8080:8080 $APP_IMAGE
-                    '''
-                }
+                sh '''
+                    docker build -t myapp:latest ./app
+                    docker run -d --name my-app-container --network jenkins-net -p 8080:8080 myapp:latest
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
                 sleep(time: 20, unit: "SECONDS")
-                dir('tests') {
-                    sh '''
-                        echo "Waiting for app to become healthy..."
-                        for i in {1..10}; do
-                          if curl -s http://$APP_CONTAINER_NAME:8080/actuator/health | grep -q UP; then
-                            echo "App is up!"
-                            break
-                          fi
-                          echo "Still waiting..."
-                          sleep 3
-                        done
-                    '''
-
-                    sh '''
-                        docker run --rm \
-                          --network $NETWORK \
-                          -v "$PWD":/tests \
-                          -w /tests \
-                          maven:3.9.6-eclipse-temurin-17 \
-                          mvn test
-                    '''
-                }
+                sh '''
+                    echo "Waiting for app to become healthy..."
+                    for i in {1..10}; do
+                      if curl -s http://my-app-container:8080/actuator/health | grep -q UP; then
+                        echo "App is up!"
+                        break
+                      fi
+                      echo "Still waiting..."
+                      sleep 3
+                    done
+                '''
+                sh '''
+                    docker run --rm \
+                      --network jenkins-net \
+                      -v "$PWD/tests:/tests" \
+                      -w /tests \
+                      maven:3.9.6-eclipse-temurin-17 \
+                      mvn test
+                '''
             }
             post {
                 always {
@@ -75,10 +64,7 @@ pipeline {
 
     post {
         always {
-            sh '''
-                docker stop $APP_CONTAINER_NAME || true
-                docker rm $APP_CONTAINER_NAME || true
-            '''
+            sh 'docker stop my-app-container || true && docker rm my-app-container || true'
         }
     }
 }
