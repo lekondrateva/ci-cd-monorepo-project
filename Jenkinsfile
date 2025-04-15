@@ -8,6 +8,15 @@ pipeline {
             }
         }
 
+                stage('Debug Workspace') {
+                    steps {
+                        script {
+                            sh 'echo "Current workspace is: $PWD"'
+                            sh 'ls -la'
+                        }
+                    }
+                }
+
         stage('Build Application') {
             steps {
                 script {
