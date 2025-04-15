@@ -13,6 +13,14 @@ pipeline {
                 dir('ci-cd-monorepo-project') {
                     script {
                         def workspacePath = pwd()
+                        // Временно проверим, что pom.xml есть
+                        sh """
+                            docker run --rm \
+                              -v ${workspacePath}:/project \
+                              -w /project \
+                              alpine sh -c 'ls -la /project'
+                        """
+                        // Сборка приложения
                         sh """
                             docker run --rm \
                               -v ${workspacePath}:/project \
@@ -27,7 +35,7 @@ pipeline {
 
         stage('Docker Build & Run') {
             steps {
-                dir('app') {
+                dir('ci-cd-monorepo-project/app') {
                     sh 'docker build -t myapp:latest .'
                     sh 'docker run -d --name my-app-container --network jenkins-net -p 8080:8080 myapp:latest'
                 }
@@ -37,7 +45,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sleep(time: 20, unit: "SECONDS")
-                dir('tests') {
+                dir('ci-cd-monorepo-project/tests') {
                     sh '''
                         echo "Waiting for app to become healthy..."
                         for i in {1..10}; do
@@ -49,7 +57,6 @@ pipeline {
                           sleep 3
                         done
                     '''
-
                     sh '''
                         docker run --rm \
                           --network jenkins-net \
@@ -63,7 +70,7 @@ pipeline {
             post {
                 always {
                     allure([
-                        results: [[path: 'tests/target/allure-results']]
+                        results: [[path: 'ci-cd-monorepo-project/tests/target/allure-results']]
                     ])
                 }
             }
