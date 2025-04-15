@@ -11,7 +11,7 @@ pipeline {
         stage('Build Application') {
             steps {
                 script {
-                    def pomDir = "${env.WORKSPACE}/ci-cd-monorepo-project"
+                    def pomDir = "${env.WORKSPACE}" // просто корень, без /ci-cd-monorepo-project
                     sh """
                         docker run --rm \
                           -v ${pomDir}:/project \
