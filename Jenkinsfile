@@ -24,7 +24,7 @@ pipeline {
             steps {
                 dir('app') {
                     sh 'docker build -t myapp:latest .'
-                    sh 'docker run -d --name my-app-container -p 8080:8080 myapp:latest'
+                    sh "docker run -d --name my-app-container --network jenkins-net -p 8080:8080 myapp:latest"
                 }
             }
         }

@@ -16,7 +16,7 @@ public class ApplicationTest {
     @Description("Calls /actuator/health and expects 200 OK")
     @Severity(SeverityLevel.CRITICAL)
     public void healthEndpointTest() {
-        RestAssured.get("http://host.docker.internal:8080/actuator/health")
+        RestAssured.get("http://my-app-container:8080/actuator/health")
                 .then()
                 .statusCode(200)
                 .body(equalTo("Application is running!"));
