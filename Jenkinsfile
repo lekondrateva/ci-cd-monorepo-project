@@ -10,32 +10,30 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                dir('ci-cd-monorepo-project') {
-                    script {
-                        def workspacePath = pwd()
-                        // Временно проверим, что pom.xml есть
-                        sh """
-                            docker run --rm \
-                              -v ${workspacePath}:/project \
-                              -w /project \
-                              alpine sh -c 'ls -la /project'
-                        """
-                        // Сборка приложения
-                        sh """
-                            docker run --rm \
-                              -v ${workspacePath}:/project \
-                              -w /project \
-                              maven:3.9.6-eclipse-temurin-17 \
-                              mvn clean package -DskipTests
-                        """
-                    }
+                script {
+                    def workspacePath = pwd()
+                    // Проверка на видимость pom.xml
+                    sh """
+                        docker run --rm \
+                          -v ${workspacePath}:/project \
+                          -w /project \
+                          alpine sh -c 'ls -la /project'
+                    """
+                    // Сборка
+                    sh """
+                        docker run --rm \
+                          -v ${workspacePath}:/project \
+                          -w /project \
+                          maven:3.9.6-eclipse-temurin-17 \
+                          mvn clean package -DskipTests
+                    """
                 }
             }
         }
 
         stage('Docker Build & Run') {
             steps {
-                dir('ci-cd-monorepo-project/app') {
+                dir('app') {
                     sh 'docker build -t myapp:latest .'
                     sh 'docker run -d --name my-app-container --network jenkins-net -p 8080:8080 myapp:latest'
                 }
@@ -45,7 +43,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sleep(time: 20, unit: "SECONDS")
-                dir('ci-cd-monorepo-project/tests') {
+                dir('tests') {
                     sh '''
                         echo "Waiting for app to become healthy..."
                         for i in {1..10}; do
@@ -70,7 +68,7 @@ pipeline {
             post {
                 always {
                     allure([
-                        results: [[path: 'ci-cd-monorepo-project/tests/target/allure-results']]
+                        results: [[path: 'tests/target/allure-results']]
                     ])
                 }
             }
