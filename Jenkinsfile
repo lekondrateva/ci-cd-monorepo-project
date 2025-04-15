@@ -10,13 +10,16 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                sh '''
-                    docker run --rm \
-                      -v $PWD:/project \
-                      -w /project \
-                      maven:3.9.6-eclipse-temurin-17 \
-                      mvn clean package -DskipTests -pl app
-                '''
+                script {
+                    def workspacePath = pwd()
+                    sh """
+                        docker run --rm \
+                          -v ${workspacePath}:/project \
+                          -w /project \
+                          maven:3.9.6-eclipse-temurin-17 \
+                          mvn clean package -DskipTests -pl app
+                    """
+                }
             }
         }
 
