@@ -10,17 +10,15 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                dir('ci-cd-monorepo-project') {
-                    script {
-                        def workspace = pwd()
-                        sh """
-                            docker run --rm \
-                              -v ${workspace}:/project \
-                              -w /project \
-                              maven:3.9.6-eclipse-temurin-17 \
-                              mvn clean package -DskipTests
-                        """
-                    }
+                script {
+                    def pomDir = "${env.WORKSPACE}/ci-cd-monorepo-project"
+                    sh """
+                        docker run --rm \
+                          -v ${pomDir}:/project \
+                          -w /project \
+                          maven:3.9.6-eclipse-temurin-17 \
+                          mvn clean package -DskipTests
+                    """
                 }
             }
         }
