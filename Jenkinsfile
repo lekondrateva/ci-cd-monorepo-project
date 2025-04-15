@@ -22,15 +22,7 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                dir('app') {
-                    sh '''
-                        docker run --rm \
-                          -v "$PWD":/app \
-                          -w /app \
-                          maven:3.9.6-eclipse-temurin-17 \
-                          mvn clean package -DskipTests
-                    '''
-                }
+                sh 'docker run --rm -v $PWD/app:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean package -DskipTests'
             }
         }
 
