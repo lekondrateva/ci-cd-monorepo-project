@@ -17,20 +17,20 @@ pipeline {
                     }
                 }
 
-        stage('Build Application') {
-            steps {
-                script {
-                    def workspace = "${env.WORKSPACE}/ci-cd-monorepo-project"
-                    sh """
-                        docker run --rm \
-                          -v ${workspace}:/project \
-                          -w /project \
-                          maven:3.9.6-eclipse-temurin-17 \
-                          mvn clean package -DskipTests
-                    """
-                }
-            }
+stage('Build Application') {
+    steps {
+        script {
+            def pomDir = "${env.WORKSPACE}" // здесь лежит pom.xml
+            sh """
+                docker run --rm \
+                  -v ${pomDir}:/project \
+                  -w /project \
+                  maven:3.9.6-eclipse-temurin-17 \
+                  mvn clean package -DskipTests
+            """
         }
+    }
+}
 
         stage('Docker Build & Run') {
             steps {
