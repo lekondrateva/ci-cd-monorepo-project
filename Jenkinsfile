@@ -10,7 +10,7 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                dir('.') {
+                dir('ci-cd-monorepo-project') {
                     script {
                         def workspace = pwd()
                         sh """
